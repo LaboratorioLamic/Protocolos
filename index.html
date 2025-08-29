@@ -332,8 +332,16 @@
             { title: "Questionário - Espermograma", sector: "Questionario", link: "https://docs.google.com/document/d/1mYrohYhwi9cWOKz71_AYJv1QjiOiGn9V/edit?usp=drive_link&ouid=111780347480586113555&rtpof=true&sd=true", forms: [] },
         ];
 
-        // Initialize favorites from localStorage
-        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        // Initialize favorites from localStorage (namespaced key + migration from old key)
+        const FAVORITES_KEY = 'lamic_protocolos_favorites_v1';
+        let favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY) || 'null');
+        if (!Array.isArray(favorites)) {
+            const legacy = JSON.parse(localStorage.getItem('favorites') || 'null');
+            favorites = Array.isArray(legacy) ? legacy : [];
+            try {
+                localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+            } catch (e) {}
+        }
         let selectedSector = '';
         let showFavorites = false;
 
@@ -397,7 +405,7 @@
             } else {
                 favorites.push(index);
             }
-            localStorage.setItem('favorites', JSON.stringify(favorites));
+            localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
             updateCards();
         }
 
